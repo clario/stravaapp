@@ -1,0 +1,310 @@
+<html>
+<head>
+<!--script src="http://fb.me/react-0.13.0.js"></script-->
+<script src="http://fb.me/react-with-addons-0.13.1.js"></script>
+<script src="http://fb.me/JSXTransformer-0.13.0.js"></script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+
+<!-- Latest compiled and minified JavaScript -->
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+</head>
+<style>
+  body{
+    margin: 40px;
+  }
+
+
+</style>
+
+<body>
+  <h1>Dataloy Strava Status</h1>
+  <div id="list"/>
+<script src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+ 
+
+
+
+<script type="text/javascript">
+
+function initialize(id) {
+    var myLatlng = new google.maps.LatLng(51.65905179951626, 7.3835928124999555);
+    var myOptions = {
+        zoom: 8,
+        center: myLatlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    var map = new google.maps.Map(document.getElementById("map"), myOptions);
+        
+    var decodedPath = google.maps.geometry.encoding.decodePath('}~kvHmzrr@ba\\hnc@jiu@r{Zqx~@hjp@pwEhnc@zhu@zflAbxn@fhjBvqHroaAgcnAp}gAeahAtqGkngAinc@_h|@r{Zad\\y|_D}_y@swg@ysg@}llBpoZqa{@xrw@~eBaaX}{uAero@uqGadY}nr@`dYs_NquNgbjAf{l@|yh@bfc@}nr@z}q@i|i@zgz@r{ZhjFr}gApob@ff}@laIsen@dgYhdPvbIren@'); 
+    var decodedLevels = decodeLevels("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+
+    var setRegion = new google.maps.Polyline({
+        path: decodedPath,
+        levels: decodedLevels,
+        strokeColor: "#FF0000",
+        strokeOpacity: 1.0,
+        strokeWeight: 2,
+        map: map
+    });
+}
+
+function decodeLevels(encodedLevelsString) {
+    var decodedLevels = [];
+
+    for (var i = 0; i < encodedLevelsString.length; ++i) {
+        var level = encodedLevelsString.charCodeAt(i) - 63;
+        decodedLevels.push(level);
+    }
+    return decodedLevels;
+}
+
+
+</script>
+
+  <script type="text/jsx">
+
+
+var Gmap = React.createClass({  
+    getDefaultProps: function () {
+        return {
+            initialZoom: 8,
+            mapCenterLat: 43.6425569,
+            mapCenterLng: -79.4073126,
+        };
+    },
+    componentDidMount: function (rootNode) {
+        var mapOptions = {
+            center: this.mapCenterLatLng(),
+            zoom: this.props.initialZoom
+        },
+        map = new google.maps.Map(this.getDOMNode(), mapOptions);
+        var marker = new google.maps.Marker({position: this.mapCenterLatLng(), title: 'Hi', map: map});
+        this.setState({map: map});
+    },
+    mapCenterLatLng: function () {
+        var props = this.props;
+        return new google.maps.LatLng(props.mapCenterLat, props.mapCenterLng);
+    },
+    render: function () {
+        return (
+        	<div className='map-gic'></div>
+        );
+    }
+});
+
+
+  var List = React.createClass({
+
+                  getInitialState: function() {
+    return {
+      array: []
+   
+    };
+  },
+
+     
+             componentDidMount: function() {
+                   var _this = this;
+                   var url = "https://www.strava.com/api/v3/clubs/123596/members?access_token=d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                    var array2 = [];
+
+                    $.ajax({
+                      async : true,
+                      type:'GET',
+                      contentType: 'application/json',
+                      url: url,
+                      cache:false,
+                      dataType: 'jsonp',
+                      crossDomain:true,
+                      headers: {
+                       //   "access_token":"d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                      }, 
+                      success: function(result) {
+                          
+                         
+                           result.forEach(function(item){
+                            console.log(JSON.stringify(item))
+                            var person = {"name": item.firstname + " "+ item.lastname,  "id": item.id};
+                            array2.push(person);
+
+                           });
+                           loadStats();
+                           _this.setState({array: array2});
+
+                           /** var lastGist = result[0];
+                            if (this.isMounted()) {
+                              this.setState({
+                                username: lastGist.owner.login,
+                                lastGistUrl: lastGist.html_url
+                              });
+                            }*/
+                    }}
+                  );
+
+                  function loadStats(){
+                      
+                      array2.forEach(function(item){
+                        
+                         var statsUrl = "https://www.strava.com/api/v3/athletes/" +item.id +"/activities?access_token=d50cd897df02bc6ca88f814467be5e49694ea6f0";
+                                   $.ajax({
+                      async : true,
+                      type:'GET',
+                      contentType: 'application/json',
+                      url: statsUrl,
+                      cache:false,
+                      dataType: 'jsonp',
+                      crossDomain:true,
+                      headers: {
+                         // "access_token":"d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                      }, 
+                      success: function(result) {
+                         console.log(item.name);
+                         console.log(JSON.stringify(result));
+                    }}
+                  );
+
+                      })
+               
+                  }
+
+
+
+                  },
+
+
+
+                  
+                render: function(){
+                var _this = this;
+                        function listItem(item){
+                     
+                            return <a key={item.id} className="list-group-item"> <h3 className="list-group-item-heading">{item.name + " " + item.id}</h3></a> ;
+                         
+                       }
+                        
+
+                        
+
+                return <div>{this.state.array.map(listItem)}</div>;
+                }
+
+  });
+
+
+	var Actitiveter = React.createClass({
+
+                  getInitialState: function() {
+    return {
+      array: []
+   
+    };
+  },
+
+     
+             componentDidMount: function() {
+                   var _this = this;
+                   var url = "https://www.strava.com/api/v3/clubs/123596/activities?access_token=d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                    var array2 = [];
+
+                    $.ajax({
+                      async : true,
+                      type:'GET',
+                      contentType: 'application/json',
+                      url: url,
+                      cache:false,
+                      dataType: 'jsonp',
+                      crossDomain:true,
+                      headers: {
+                       //   "access_token":"d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                      }, 
+                      success: function(result) {
+                          
+                         
+                           result.forEach(function(item){
+                            console.log(JSON.stringify(item))
+                            var activity = {"name": item.athlete.firstname, "id": item.id, "distance": item.distance};
+                            array2.push(activity);
+
+                           });
+                          // loadStats();
+                           _this.setState({array: array2});
+
+                           /** var lastGist = result[0];
+                            if (this.isMounted()) {
+                              this.setState({
+                                username: lastGist.owner.login,
+                                lastGistUrl: lastGist.html_url
+                              });
+                            }*/
+                    }}
+                  );
+
+                  function loadStats(){
+                      
+                      array2.forEach(function(item){
+                        
+                         var statsUrl = "https://www.strava.com/api/v3/athletes/" +item.id +"/activities?access_token=d50cd897df02bc6ca88f814467be5e49694ea6f0";
+                                   $.ajax({
+                      async : true,
+                      type:'GET',
+                      contentType: 'application/json',
+                      url: statsUrl,
+                      cache:false,
+                      dataType: 'jsonp',
+                      crossDomain:true,
+                      headers: {
+                         // "access_token":"d50cd897df02bc6ca88f814467be5e49694ea6f0"
+                      }, 
+                      success: function(result) {
+                         console.log(item.name);
+                         console.log(JSON.stringify(result));
+                    }}
+                  );
+
+                      })
+               
+                  }
+
+
+
+                  },
+
+
+
+                  
+                render: function(){
+                var _this = this;
+                        function listItem(item){
+                     
+                            return <a key={item.id} className="list-group-item"> <h3 className="list-group-item-heading">{item.name + " " + (item.distance/1000).toString().substr(0, 3) + " km"}</h3></a> ;
+                         
+                       }
+                        
+
+                        
+
+                return <div>{this.state.array.map(listItem)}</div>;
+                }
+
+  });
+
+
+  React.render(<Gmap/>,list);
+
+  </script>
+
+
+
+  </body>
+
+
+  </html>
